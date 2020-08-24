@@ -66,6 +66,7 @@ public:
 
 private:
     template<typename LEP>
+        //?not familar with template
     bool lepJetPassdRMatch(const int& jetIndex, const LEP& lepton, const edm::Handle<std::vector<pat::Jet> >& jets)
     {
         //Get the index of the jet closest to the lepton
@@ -109,15 +110,15 @@ SHOTProducer::SHOTProducer(const edm::ParameterSet& iConfig)
 {
     //register vector of top objects
     produces<std::vector<TopObjLite>>();
+    //?where is produces defined?
 
     //now do what ever other initialization is needed
     edm::InputTag jetSrc = iConfig.getParameter<edm::InputTag>("ak4JetSrc");
-
     edm::InputTag muonSrc = iConfig.getParameter<edm::InputTag>("muonSrc");
     edm::InputTag elecSrc = iConfig.getParameter<edm::InputTag>("elecSrc");
+    //so I think the difference betwen the InputTag and regular C++ type is that InputTag is a module name.
 
     ak4ptCut_ = iConfig.getParameter<double>("ak4PtCut");
-
     muonPtCut_ = iConfig.getParameter<double>("muonPtCut");
     elecPtCut_ = iConfig.getParameter<double>("elecPtCut");
 
@@ -150,24 +151,23 @@ SHOTProducer::SHOTProducer(const edm::ParameterSet& iConfig)
         edm::LogWarning("SHOTProducer") << "Warning!!! Unrecognized muon ID flag \"" << elecIDFlagName << "\", defaulting to veto.  (Options are CutBasedIdVeto, CutBasedIdLoose, CutBasedIdMedium, CutBasedIdTight)" << std::endl;
     }
 
-    leptonJetDr_ = iConfig.getParameter<double>("leptonJetDr");
+    leptonJetDr_ = iConfig.getParameter<double>("leptonJetDr");//0.2 from cfi
 
     doLeptonCleaning_  = iConfig.getParameter<bool>("doLeptonCleaning");
 
     qgTaggerKey_ = iConfig.getParameter<std::string>("qgTaggerKey");
     deepCSVBJetTags_ = iConfig.getParameter<std::string>("deepCSVBJetTags");
-    bTagKeyString_ = iConfig.getParameter<std::string>("bTagKeyString");
+    bTagKeyString_ = iConfig.getParameter<std::string>("bTagKeyString");//'pfCombinedInclusiveSecondaryVertexV2BJetTags'
 
-    taggerCfgFile_ = iConfig.getParameter<edm::FileInPath>("taggerCfgFile").fullPath();
+    taggerCfgFile_ = iConfig.getParameter<edm::FileInPath>("taggerCfgFile").fullPath();//"TopTagger/TopTagger/data/TopTaggerCfg-DeepResolved_DeepCSV_GR_noDisc_Release_v1.0.0/TopTagger.cfg"
 
     discriminatorCut_ = iConfig.getParameter<double>("discriminatorCut");
 
     saveAllTopCandidates_  = iConfig.getParameter<bool>("saveAllTopCandidates");
 
     JetTok_ = consumes<std::vector<pat::Jet> >(jetSrc);
-
     muonTok_ = consumes<std::vector<pat::Muon>>(muonSrc);
-    elecTok_ = consumes<std::vector<pat::Electron>>(elecSrc);
+    elecTok_ = consumes<std::vector<pat::Electron>>(elecSrc);//'slimmedElectrons'
 
     //configure the top tagger
     try
@@ -176,10 +176,11 @@ SHOTProducer::SHOTProducer(const edm::ParameterSet& iConfig)
         size_t splitLocation = taggerCfgFile_.rfind("/");
         std::string workingDir = taggerCfgFile_.substr(0, splitLocation);
         std::string configName = taggerCfgFile_.substr(splitLocation + 1);
-        tt.setWorkingDirectory(workingDir);
+        tt.setWorkingDirectory(workingDir);//tt:TopTagger class
         tt.setCfgFile(configName);
     }
     catch(const TTException& e)
+        //?
     {
         //Convert the TTException into a cms::Exception
         throw cms::Exception(e.getFileName() + ":" + std::to_string(e.getLineNumber()) + ", in function \"" + e.getFunctionName() + "\" -- " + e.getMessage());
@@ -197,7 +198,7 @@ SHOTProducer::~SHOTProducer()
 // member functions
 //
 std::unique_ptr<std::vector<TopObjLite>> SHOTProducer::getFinalTopObjLiteVec(const TopTaggerResults& ttr)
-{
+{/*{{{*/
     //get reconstructed top
     const std::vector<TopObject*>& tops = ttr.getTops();
 
@@ -211,10 +212,10 @@ std::unique_ptr<std::vector<TopObjLite>> SHOTProducer::getFinalTopObjLiteVec(con
         }
     }
     return liteTops;
-}
+}/*}}}*/
 
 std::unique_ptr<std::vector<TopObjLite>> SHOTProducer::getCandidateTopObjLiteVec(const TopTaggerResults& ttr)
-{
+{/*{{{*/
     //get top candidates
     const std::vector<TopObject>& tops = ttr.getTopCandidates();
 
@@ -228,7 +229,7 @@ std::unique_ptr<std::vector<TopObjLite>> SHOTProducer::getCandidateTopObjLiteVec
         }
     }
     return liteTops;
-}
+}/*}}}*/
 
 
 // ------------ method called to produce the data  ------------
